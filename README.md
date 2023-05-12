@@ -1,6 +1,7 @@
 ## Descrição
 
 Esse repositório foi criado para testes de Change Data Capture utilizando o Debezium.
+Você pode acompanhar a postagem para maiores detalhes: https://thedataengineer.com.br/2023/05/12/change-data-capture-com-debezium/
 
 ## Setup
 
