@@ -5,6 +5,7 @@ Você pode acompanhar a postagem para maiores detalhes: https://thedataengineer.
 
 ## Setup
 
+Certifique-se de que tem o kubernetes instalado na sua maquina ou provider.
 Comando para preparar o ambiente:
 
     make k8s-setup
@@ -32,7 +33,7 @@ Debezium: http://localhost:8083
 ## Cadastrando o conector do exemplo via POST:
 
 - Method: POST  Endpoint: http://localhost:8083/connectors
-    - Example Body:
+    - Body:
     ```json
     {
         "name": "postgres-connector",
