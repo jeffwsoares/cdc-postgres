@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: ns-dbz-data-engineer
+  name: kafka-svc
+spec:
+  selector:
+    app: kafka
+  ports:
+    - name: kafka1
+      port: 9092
+      targetPort: 9092    
+    
+

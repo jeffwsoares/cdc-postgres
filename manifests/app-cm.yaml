@@ -1,0 +1,94 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dbz-app-cm
+  namespace: ns-dbz-data-engineer
+data:
+  requirements.txt: |
+    psycopg2-binary==2.9.6
+    Faker==18.6.0
+
+  app.py: |
+    import psycopg2
+    import uuid
+    import random
+    import time
+    from faker import Faker
+
+    if __name__ == '__main__':
+
+        while True:
+            fake = Faker()
+            
+            conn = psycopg2.connect(
+                host='postgres-svc.ns-dbz-data-engineer.svc.cluster.local',                
+                database='debezium_db',
+                user='postgres',
+                password='postgres',
+                port='5432'
+            )
+
+            cursor = conn.cursor()
+        
+            table = '''CREATE TABLE IF NOT EXISTS CUSTOMERS(
+                id_customer varchar,
+                name varchar,
+                address varchar, 
+                email varchar,
+                salary decimal
+            );'''
+            
+            cursor.execute(table)
+            
+            cursor.execute('ALTER TABLE CUSTOMERS REPLICA IDENTITY FULL')
+            
+            # Insert
+            # --------------------------------------------
+            query = 'INSERT INTO CUSTOMERS (id_customer, name, address, email, salary) VALUES (%s, %s, %s, %s, %s)'
+
+            for _ in range(4):
+                data = (
+                    str(uuid.uuid1()),
+                    fake.name(),
+                    fake.address(),
+                    fake.email(),
+                    fake.random_int(min=1000, max=9999)
+                )
+                print(f'insert -> {data}')
+                
+                cursor.execute(query, data)
+
+            # Delete
+            # --------------------------------------------
+            cursor.execute('SELECT * FROM CUSTOMERS LIMIT 10')
+            delete = []
+            query =  'DELETE FROM CUSTOMERS WHERE id_customer = %s'        
+            for row in cursor:
+                if random.randrange(0,99) < 20:                
+                    delete.append(row[0])
+                    
+            for row in delete:
+                print(f'delete -> {row}')
+                cursor.execute(query, (row,))
+                
+            # Update
+            # --------------------------------------------
+            cursor.execute('SELECT * FROM CUSTOMERS LIMIT 10')
+            update = []
+            query =  f"""UPDATE CUSTOMERS 
+                        SET email = '{fake.email()}'
+                        WHERE id_customer = %s"""
+                        
+            for row in cursor:
+                if random.randrange(0,99) < 20:                
+                    update.append(row[0])
+                    
+            for row in update:
+                print(f'update -> {row}')
+                cursor.execute(query, (row,))
+
+            conn.commit()
+            cursor.close()
+            conn.close()
+            
+            time.sleep(60)

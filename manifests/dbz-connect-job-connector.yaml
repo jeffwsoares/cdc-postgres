@@ -1,0 +1,30 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: job-include-postgres-connector
+  namespace: ns-dbz-data-engineer
+spec:
+  ttlSecondsAfterFinished: 100
+  backoffLimit: 4
+  template:
+    spec:
+      volumes:
+      - name: dbz-connect-conf
+        configMap:
+          name: job-include-postgres-connector-cm
+          
+      containers:
+      - name: curl
+        image: curlimages/curl:latest
+        volumeMounts:
+          - mountPath: /config
+            name: dbz-connect-conf
+        command: ["curl", 
+                  "--header",
+                  "Content-Type: application/json",
+                  "--request",
+                  "POST",
+                  "--data",
+                  "@/config/parameters.json",
+                  "http://dbz-connect-svc.ns-dbz-data-engineer.svc.cluster.local:8083/connectors"]           
+      restartPolicy: Never

@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: dbz-fake-transaction
+  namespace: ns-dbz-data-engineer
+  labels:
+    app: fake
+spec:
+  volumes:
+  - name: vol-cm-app
+    configMap:
+      name: dbz-app-cm
+
+  containers:
+  - name: app
+    image: python:3.9.16
+    volumeMounts:
+      - mountPath: /app_dir
+        name: vol-cm-app
+    resources:
+      limits:
+        memory: "250Mi"
+        cpu: "250m"
+    command: ["/bin/sh","-c"]
+    args: ["pip install -r /app_dir/requirements.txt;python /app_dir/app.py"]
+      
+      
